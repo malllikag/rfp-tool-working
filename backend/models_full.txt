@@ -1,0 +1,50 @@
+- models/embedding-gecko-001
+- models/gemini-2.5-pro-preview-03-25 (supports generateContent)
+- models/gemini-2.5-flash (supports generateContent)
+- models/gemini-2.5-pro-preview-05-06 (supports generateContent)
+- models/gemini-2.5-pro-preview-06-05 (supports generateContent)
+- models/gemini-2.5-pro (supports generateContent)
+- models/gemini-2.0-flash-exp (supports generateContent)
+- models/gemini-2.0-flash (supports generateContent)
+- models/gemini-2.0-flash-001 (supports generateContent)
+- models/gemini-2.0-flash-exp-image-generation (supports generateContent)
+- models/gemini-2.0-flash-lite-001 (supports generateContent)
+- models/gemini-2.0-flash-lite (supports generateContent)
+- models/gemini-2.0-flash-lite-preview-02-05 (supports generateContent)
+- models/gemini-2.0-flash-lite-preview (supports generateContent)
+- models/gemini-2.0-pro-exp (supports generateContent)
+- models/gemini-2.0-pro-exp-02-05 (supports generateContent)
+- models/gemini-exp-1206 (supports generateContent)
+- models/gemini-2.0-flash-thinking-exp-01-21 (supports generateContent)
+- models/gemini-2.0-flash-thinking-exp (supports generateContent)
+- models/gemini-2.0-flash-thinking-exp-1219 (supports generateContent)
+- models/gemini-2.5-flash-preview-tts (supports generateContent)
+- models/gemini-2.5-pro-preview-tts (supports generateContent)
+- models/learnlm-2.0-flash-experimental (supports generateContent)
+- models/gemma-3-1b-it (supports generateContent)
+- models/gemma-3-4b-it (supports generateContent)
+- models/gemma-3-12b-it (supports generateContent)
+- models/gemma-3-27b-it (supports generateContent)
+- models/gemma-3n-e4b-it (supports generateContent)
+- models/gemma-3n-e2b-it (supports generateContent)
+- models/gemini-flash-latest (supports generateContent)
+- models/gemini-flash-lite-latest (supports generateContent)
+- models/gemini-pro-latest (supports generateContent)
+- models/gemini-2.5-flash-lite (supports generateContent)
+- models/gemini-2.5-flash-image-preview (supports generateContent)
+- models/gemini-2.5-flash-image (supports generateContent)
+- models/gemini-2.5-flash-preview-09-2025 (supports generateContent)
+- models/gemini-2.5-flash-lite-preview-09-2025 (supports generateContent)
+- models/gemini-3-pro-preview (supports generateContent)
+- models/gemini-robotics-er-1.5-preview (supports generateContent)
+- models/gemini-2.5-computer-use-preview-10-2025 (supports generateContent)
+- models/embedding-001
+- models/text-embedding-004
+- models/gemini-embedding-exp-03-07
+- models/gemini-embedding-exp
+- models/gemini-embedding-001
+- models/aqa
+- models/imagen-4.0-generate-preview-06-06
+- models/imagen-4.0-ultra-generate-preview-06-06
+- models/imagen-4.0-generate-001
+- models/imagen-4.0-ultra-generate-001

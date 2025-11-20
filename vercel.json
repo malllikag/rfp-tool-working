@@ -1,0 +1,22 @@
+{
+    "version": 2,
+    "buildCommand": "npm run build",
+    "outputDirectory": "dist",
+    "installCommand": "npm install",
+    "framework": "vite",
+    "functions": {
+        "api/**/*.js": {
+            "memory": 1024,
+            "maxDuration": 60
+        }
+    },
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "/index.html"
+        }
+    ],
+    "env": {
+        "GEMINI_API_KEY": "@gemini-api-key"
+    }
+}
