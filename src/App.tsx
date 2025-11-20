@@ -44,31 +44,32 @@ function CreateProjectPage() {
     setPreviewError(null);
     setPidError(null);
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const res = await fetch(`${API_URL}/api/upload`, {
-        method: "POST",
-        body: formData,
-      });
+      // Read file directly in browser using FileReader
+      const reader = new FileReader();
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Upload failed");
-      }
+      reader.onload = (event) => {
+        const text = event.target?.result as string;
+        setFileMeta({
+          fileId: `${Date.now()}-${file.name}`,
+          originalName: file.name,
+          size: file.size,
+          uploadTime: new Date().toISOString(),
+        });
+        setPreviewText(text);
+        setIsUploading(false);
+      };
 
-      const data = await res.json();
-      setFileMeta({
-        fileId: data.fileId,
-        originalName: data.originalName,
-        size: data.size,
-        uploadTime: data.uploadTime,
-      });
+      reader.onerror = () => {
+        setUploadError("Failed to read file");
+        setIsUploading(false);
+      };
+
+      reader.readAsText(file);
     } catch (err: any) {
-      setUploadError(err.message || "Error uploading file");
-    } finally {
+      setUploadError(err.message || "Error reading file");
       setIsUploading(false);
+    } finally {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
