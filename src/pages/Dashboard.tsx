@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FileText, Clock, CheckCircle } from "lucide-react";
+import { FileText } from "lucide-react";
 
 interface ProjectFile {
     fileId: string;
@@ -44,26 +44,6 @@ export default function Dashboard() {
                         <div style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>Total Projects</div>
                     </div>
                 </div>
-
-                <div className="card" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                    <div style={{ padding: "1rem", backgroundColor: "rgba(16, 185, 129, 0.1)", borderRadius: "12px", color: "#10b981" }}>
-                        <Clock size={24} />
-                    </div>
-                    <div>
-                        <div style={{ fontSize: "2rem", fontWeight: "bold" }}>0</div>
-                        <div style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>In Progress</div>
-                    </div>
-                </div>
-
-                <div className="card" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                    <div style={{ padding: "1rem", backgroundColor: "rgba(245, 158, 11, 0.1)", borderRadius: "12px", color: "#f59e0b" }}>
-                        <CheckCircle size={24} />
-                    </div>
-                    <div>
-                        <div style={{ fontSize: "2rem", fontWeight: "bold" }}>{projects.length}</div>
-                        <div style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>Completed</div>
-                    </div>
-                </div>
             </div>
 
             {/* Recent Activity */}
@@ -96,9 +76,6 @@ export default function Dashboard() {
                                                 {new Date(project.uploadTime).toLocaleDateString()} • {(project.size / 1024).toFixed(1)} KB
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="status-badge" style={{ backgroundColor: "#d1fae5", color: "#065f46" }}>
-                                        Completed
                                     </div>
                                 </div>
                             ))}
