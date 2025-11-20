@@ -35,11 +35,12 @@ export default function Login({ onLogin }: LoginProps) {
             justifyContent: "center",
             backgroundColor: "#f9fafb", // Light gray background
             fontFamily: "'Inter', sans-serif",
+            padding: "1rem", // Add padding to container for mobile safety
         }}>
             <div className="card" style={{
                 width: "100%",
                 maxWidth: "400px",
-                padding: "2.5rem",
+                padding: "2rem", // Slightly reduced padding for better mobile fit
                 boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
                 backgroundColor: "white",
                 borderRadius: "1rem",
