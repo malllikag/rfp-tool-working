@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { FileText, Download, Trash2, X } from "lucide-react";
-import { API_URL } from "../config";
 
 interface ProjectFile {
     fileId: string;
@@ -18,12 +17,50 @@ export default function History() {
     const [projects, setProjects] = useState<ProjectFile[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [deleting, setDeleting] = useState<string | null>(null);
     const [confirmDelete, setConfirmDelete] = useState<DeleteConfirmation | null>(null);
 
+    useEffect(() => {
+        const loadHistory = () => {
+            try {
+                const history = localStorage.getItem("rfp_history");
+                if (history) {
+                    setProjects(JSON.parse(history));
+                }
+            } catch (e) {
+                console.error("Failed to load history", e);
+                setError("Failed to load history");
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadHistory();
+    }, []);
 
     const handleDeleteCancel = () => {
         setConfirmDelete(null);
+    };
+
+    const handleDownload = (fileId: string) => {
+        console.log("Download requested for:", fileId);
+        alert("File content is not stored in history, only metadata.");
+    };
+
+    const handleDeleteClick = (fileId: string, fileName: string) => {
+        setConfirmDelete({ fileId, fileName });
+    };
+
+    const handleDeleteConfirm = () => {
+        if (!confirmDelete) return;
+
+        try {
+            const updatedProjects = projects.filter(p => p.fileId !== confirmDelete.fileId);
+            setProjects(updatedProjects);
+            localStorage.setItem("rfp_history", JSON.stringify(updatedProjects));
+            setConfirmDelete(null);
+        } catch (e) {
+            console.error("Failed to delete project", e);
+            alert("Failed to delete project");
+        }
     };
 
     return (
@@ -95,18 +132,13 @@ export default function History() {
                                         <button
                                             className="btn btn-outline"
                                             onClick={() => handleDeleteClick(project.fileId, project.originalName)}
-                                            disabled={deleting === project.fileId}
                                             title="Delete"
                                             style={{
-                                                color: deleting === project.fileId ? "#999" : "#ef4444",
-                                                borderColor: deleting === project.fileId ? "#ddd" : "#ef4444",
+                                                color: "#ef4444",
+                                                borderColor: "#ef4444",
                                             }}
                                         >
-                                            {deleting === project.fileId ? (
-                                                <div className="loading-spinner" style={{ width: "16px", height: "16px", borderTopColor: "#999" }}></div>
-                                            ) : (
-                                                <Trash2 size={16} />
-                                            )}
+                                            <Trash2 size={16} />
                                         </button>
                                     </div>
                                 </div>
