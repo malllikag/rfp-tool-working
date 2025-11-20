@@ -21,53 +21,6 @@ export default function History() {
     const [deleting, setDeleting] = useState<string | null>(null);
     const [confirmDelete, setConfirmDelete] = useState<DeleteConfirmation | null>(null);
 
-    useEffect(() => {
-        fetchProjects();
-    }, []);
-
-    const fetchProjects = async () => {
-        try {
-            const res = await fetch(`${API_URL}/api/projects`);
-            if (!res.ok) throw new Error("Failed to fetch projects");
-            const data = await res.json();
-            setProjects(data);
-        } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleDownload = (fileId: string) => {
-        window.open(`${API_URL}/api/file/${fileId}`, "_blank");
-    };
-
-    const handleDeleteClick = (fileId: string, fileName: string) => {
-        setConfirmDelete({ fileId, fileName });
-    };
-
-    const handleDeleteConfirm = async () => {
-        if (!confirmDelete) return;
-
-        const { fileId } = confirmDelete;
-        setDeleting(fileId);
-        setConfirmDelete(null);
-
-        try {
-            const res = await fetch(`${API_URL}/api/projects/${fileId}`, {
-                method: "DELETE",
-            });
-
-            if (!res.ok) throw new Error("Failed to delete file");
-
-            // Remove from local state
-            setProjects(projects.filter((p) => p.fileId !== fileId));
-        } catch (err: any) {
-            alert(`Error deleting file: ${err.message}`);
-        } finally {
-            setDeleting(null);
-        }
-    };
 
     const handleDeleteCancel = () => {
         setConfirmDelete(null);

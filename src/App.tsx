@@ -41,255 +41,226 @@ function CreateProjectPage() {
     setFileMeta(null);
     setPreviewText("");
     setPidText("");
-    setPreviewError(null);
-    setPidError(null);
-
-    try {
-      // Read file directly in browser using FileReader
-      const reader = new FileReader();
-
-      reader.onload = (event) => {
-        const text = event.target?.result as string;
-        setFileMeta({
-          fileId: `${Date.now()}-${file.name}`,
-          originalName: file.name,
-          size: file.size,
-          uploadTime: new Date().toISOString(),
-        });
-        setPreviewText(text);
-        setIsUploading(false);
-      };
-
-      reader.onerror = () => {
-        setUploadError("Failed to read file");
-        setIsUploading(false);
-      };
-
-      reader.readAsText(file);
-    } catch (err: any) {
-      setUploadError(err.message || "Error reading file");
-      setIsUploading(false);
-    } finally {
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
-  };
+  }
+};
 
-  const handleViewFile = async (fileId: string) => {
-    setIsPreviewLoading(true);
-    setPreviewError(null);
-    try {
-      const res = await fetch(`${API_URL}/api/file/${fileId}/view`);
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to load preview");
-      }
-      const text = await res.text();
-      setPreviewText(text);
-    } catch (err: any) {
-      setPreviewError(err.message);
-    } finally {
-      setIsPreviewLoading(false);
-    }
-  };
-
-  const handleGeneratePid = async () => {
-    if (!previewText) return;
-
-    setIsPidLoading(true);
-    setPidError(null);
-    setPidText("");
-
-    try {
-      const res = await fetch(`${API_URL}/api/generate-pid`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rfpText: previewText }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Generation failed");
-      }
-
+const handleViewFile = async (fileId: string) => {
+  setIsPreviewLoading(true);
+  setPreviewError(null);
+  try {
+    const res = await fetch(`${API_URL}/api/file/${fileId}/view`);
+    if (!res.ok) {
       const data = await res.json();
-      setPidText(data.pid);
-    } catch (err: any) {
-      setPidError(err.message);
-    } finally {
-      setIsPidLoading(false);
+      throw new Error(data.error || "Failed to load preview");
     }
-  };
+    const text = await res.text();
+    setPreviewText(text);
+  } catch (err: any) {
+    setPreviewError(err.message);
+  } finally {
+    setIsPreviewLoading(false);
+  }
+};
 
-  useEffect(() => {
-    if (fileMeta?.fileId) {
-      handleViewFile(fileMeta.fileId);
-    }
-  }, [fileMeta]);
+const handleGeneratePid = async () => {
+  if (!previewText) return;
 
-  const copyToClipboard = () => {
-    if (pidText) {
-      navigator.clipboard.writeText(pidText);
-      alert("PID copied to clipboard!");
-    }
-  };
+  setIsPidLoading(true);
+  setPidError(null);
+  setPidText("");
 
-  // --- Export Functions ---
-  const exportToPdf = () => {
-    if (!pidText) return;
-    const doc = new jsPDF();
-    const splitText = doc.splitTextToSize(pidText, 180);
-    let y = 10;
-    for (let i = 0; i < splitText.length; i++) {
-      if (y > 280) {
-        doc.addPage();
-        y = 10;
-      }
-      doc.text(splitText[i], 10, y);
-      y += 7;
-    }
-    doc.save("generated-pid.pdf");
-  };
-
-  const exportToWord = async () => {
-    if (!pidText) return;
-    const lines = pidText.split("\n");
-    const children = lines.map(line => new Paragraph({
-      children: [new TextRun(line)],
-      spacing: { after: 200 }
-    }));
-    const doc = new Document({
-      sections: [{ properties: {}, children: children }],
+  try {
+    const res = await fetch(`${API_URL}/api/generate-pid`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rfpText: previewText }),
     });
-    const blob = await Packer.toBlob(doc);
-    saveAs(blob, "generated-pid.docx");
-  };
 
-  const exportToTxt = () => {
-    if (!pidText) return;
-    const blob = new Blob([pidText], { type: "text/plain;charset=utf-8" });
-    saveAs(blob, "generated-pid.txt");
-  };
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || "Generation failed");
+    }
 
-  return (
-    <div className="main-grid">
-      {/* Left Panel: Input & Preview */}
-      <div className="card panel">
-        <div className="panel-header">
-          <span className="panel-title">RFP Document</span>
-          <div className="actions">
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              style={{ display: "none" }}
-              accept=".pdf,.txt,.md,.html"
-            />
-            <button
-              className="btn btn-primary"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploading}
-            >
-              {isUploading ? "Uploading..." : "Upload File"}
-            </button>
+    const data = await res.json();
+    setPidText(data.pid);
+  } catch (err: any) {
+    setPidError(err.message);
+  } finally {
+    setIsPidLoading(false);
+  }
+};
+
+useEffect(() => {
+  if (fileMeta?.fileId) {
+    handleViewFile(fileMeta.fileId);
+  }
+}, [fileMeta]);
+
+const copyToClipboard = () => {
+  if (pidText) {
+    navigator.clipboard.writeText(pidText);
+    alert("PID copied to clipboard!");
+  }
+};
+
+// --- Export Functions ---
+const exportToPdf = () => {
+  if (!pidText) return;
+  const doc = new jsPDF();
+  const splitText = doc.splitTextToSize(pidText, 180);
+  let y = 10;
+  for (let i = 0; i < splitText.length; i++) {
+    if (y > 280) {
+      doc.addPage();
+      y = 10;
+    }
+    doc.text(splitText[i], 10, y);
+    y += 7;
+  }
+  doc.save("generated-pid.pdf");
+};
+
+const exportToWord = async () => {
+  if (!pidText) return;
+  const lines = pidText.split("\n");
+  const children = lines.map(line => new Paragraph({
+    children: [new TextRun(line)],
+    spacing: { after: 200 }
+  }));
+  const doc = new Document({
+    sections: [{ properties: {}, children: children }],
+  });
+  const blob = await Packer.toBlob(doc);
+  saveAs(blob, "generated-pid.docx");
+};
+
+const exportToTxt = () => {
+  if (!pidText) return;
+  const blob = new Blob([pidText], { type: "text/plain;charset=utf-8" });
+  saveAs(blob, "generated-pid.txt");
+};
+
+return (
+  <div className="main-grid">
+    {/* Left Panel: Input & Preview */}
+    <div className="card panel">
+      <div className="panel-header">
+        <span className="panel-title">RFP Document</span>
+        <div className="actions">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            style={{ display: "none" }}
+            accept=".pdf,.txt,.md,.html"
+          />
+          <button
+            className="btn btn-primary"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+          >
+            {isUploading ? "Uploading..." : "Upload File"}
+          </button>
+        </div>
+      </div>
+
+      <div className="panel-content">
+        {uploadError && (
+          <div className="status-badge status-error" style={{ marginBottom: '1rem' }}>
+            Upload Error: {uploadError}
           </div>
-        </div>
+        )}
 
-        <div className="panel-content">
-          {uploadError && (
-            <div className="status-badge status-error" style={{ marginBottom: '1rem' }}>
-              Upload Error: {uploadError}
+        {fileMeta ? (
+          <>
+            <div className="file-info" style={{ marginBottom: '1rem', color: 'var(--text-muted)' }}>
+              <span>📄 {fileMeta.originalName}</span>
+              <span style={{ marginLeft: '0.5rem' }}>({(fileMeta.size / 1024).toFixed(1)} KB)</span>
             </div>
-          )}
 
-          {fileMeta ? (
-            <>
-              <div className="file-info" style={{ marginBottom: '1rem', color: 'var(--text-muted)' }}>
-                <span>📄 {fileMeta.originalName}</span>
-                <span style={{ marginLeft: '0.5rem' }}>({(fileMeta.size / 1024).toFixed(1)} KB)</span>
+            {isPreviewLoading ? (
+              <div className="empty-state">
+                <div className="loading-spinner"></div>
+                <p>Loading preview...</p>
               </div>
-
-              {isPreviewLoading ? (
-                <div className="empty-state">
-                  <div className="loading-spinner"></div>
-                  <p>Loading preview...</p>
-                </div>
-              ) : previewError ? (
-                <div className="status-badge status-error">{previewError}</div>
-              ) : previewText ? (
-                <div style={{ whiteSpace: 'pre-wrap' }}>{previewText}</div>
-              ) : null}
-            </>
-          ) : (
-            <div className="empty-state">
-              <div className="upload-zone" onClick={() => fileInputRef.current?.click()}>
-                <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📄</div>
-                <h3>Upload RFP Document</h3>
-                <p>Supported formats: PDF, TXT, MD</p>
-              </div>
+            ) : previewError ? (
+              <div className="status-badge status-error">{previewError}</div>
+            ) : previewText ? (
+              <div style={{ whiteSpace: 'pre-wrap' }}>{previewText}</div>
+            ) : null}
+          </>
+        ) : (
+          <div className="empty-state">
+            <div className="upload-zone" onClick={() => fileInputRef.current?.click()}>
+              <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📄</div>
+              <h3>Upload RFP Document</h3>
+              <p>Supported formats: PDF, TXT, MD</p>
             </div>
-          )}
-        </div>
-
-        {previewText && (
-          <div style={{ marginTop: '1rem' }}>
-            <button
-              className="btn btn-primary"
-              style={{ width: '100%' }}
-              onClick={handleGeneratePid}
-              disabled={isPidLoading}
-            >
-              {isPidLoading ? (
-                <>
-                  <div className="loading-spinner" style={{ width: '16px', height: '16px', marginRight: '8px', borderTopColor: 'white' }}></div>
-                  Generating PID...
-                </>
-              ) : "Generate PID 🚀"}
-            </button>
           </div>
         )}
       </div>
 
-      {/* Right Panel: PID Output */}
-      <div className="card panel">
-        <div className="panel-header">
-          <span className="panel-title">Generated PID</span>
-          <div className="actions" style={{ display: 'flex', gap: '0.5rem' }}>
-            {pidText && (
+      {previewText && (
+        <div style={{ marginTop: '1rem' }}>
+          <button
+            className="btn btn-primary"
+            style={{ width: '100%' }}
+            onClick={handleGeneratePid}
+            disabled={isPidLoading}
+          >
+            {isPidLoading ? (
               <>
-                <button className="btn btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={exportToPdf} title="Export PDF">PDF</button>
-                <button className="btn btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={exportToWord} title="Export Word">DOCX</button>
-                <button className="btn btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={exportToTxt} title="Export Text">TXT</button>
-                <button className="btn btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={copyToClipboard} title="Copy">📋</button>
+                <div className="loading-spinner" style={{ width: '16px', height: '16px', marginRight: '8px', borderTopColor: 'white' }}></div>
+                Generating PID...
               </>
-            )}
-          </div>
+            ) : "Generate PID 🚀"}
+          </button>
         </div>
+      )}
+    </div>
 
-        <div className="panel-content">
-          {pidError && (
-            <div className="status-badge status-error" style={{ marginBottom: '1rem' }}>
-              Generation Error: {pidError}
-            </div>
-          )}
-
-          {isPidLoading ? (
-            <div className="empty-state">
-              <div className="loading-spinner"></div>
-              <p>Analyzing RFP and drafting PID...</p>
-            </div>
-          ) : pidText ? (
-            <div style={{ whiteSpace: 'pre-wrap' }}>{pidText}</div>
-          ) : (
-            <div className="empty-state">
-              <p>PID will appear here</p>
-            </div>
+    {/* Right Panel: PID Output */}
+    <div className="card panel">
+      <div className="panel-header">
+        <span className="panel-title">Generated PID</span>
+        <div className="actions" style={{ display: 'flex', gap: '0.5rem' }}>
+          {pidText && (
+            <>
+              <button className="btn btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={exportToPdf} title="Export PDF">PDF</button>
+              <button className="btn btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={exportToWord} title="Export Word">DOCX</button>
+              <button className="btn btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={exportToTxt} title="Export Text">TXT</button>
+              <button className="btn btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={copyToClipboard} title="Copy">📋</button>
+            </>
           )}
         </div>
       </div>
+
+      <div className="panel-content">
+        {pidError && (
+          <div className="status-badge status-error" style={{ marginBottom: '1rem' }}>
+            Generation Error: {pidError}
+          </div>
+        )}
+
+        {isPidLoading ? (
+          <div className="empty-state">
+            <div className="loading-spinner"></div>
+            <p>Analyzing RFP and drafting PID...</p>
+          </div>
+        ) : pidText ? (
+          <div style={{ whiteSpace: 'pre-wrap' }}>{pidText}</div>
+        ) : (
+          <div className="empty-state">
+            <p>PID will appear here</p>
+          </div>
+        )}
+      </div>
     </div>
-  );
+  </div>
+);
 }
 
 function Sidebar() {
