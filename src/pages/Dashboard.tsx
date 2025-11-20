@@ -23,8 +23,6 @@ export default function Dashboard() {
         }
     }, []);
 
-
-
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
             {/* Welcome Section */}
@@ -35,30 +33,54 @@ export default function Dashboard() {
 
             {/* Stats Cards */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.5rem" }}>
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "1rem",
-                borderBottom: "1px solid var(--border-color)"
-                                }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                    <div style={{ padding: "0.5rem", backgroundColor: "var(--bg-app)", borderRadius: "8px" }}>
-                        <FileText size={20} color="var(--text-muted)" />
+                <div className="card" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                    <div style={{ padding: "1rem", backgroundColor: "rgba(107, 95, 255, 0.1)", borderRadius: "12px", color: "var(--primary)" }}>
+                        <FileText size={24} />
                     </div>
                     <div>
-                        <div style={{ fontWeight: "500" }}>{project.originalName}</div>
-                        <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
-                            {new Date(project.uploadTime).toLocaleDateString()} • {(project.size / 1024).toFixed(1)} KB
-                        </div>
+                        <div style={{ fontSize: "2rem", fontWeight: "bold" }}>{projects.length}</div>
+                        <div style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>Total Uploads</div>
                     </div>
                 </div>
             </div>
+
+            {/* Recent Activity */}
+            <div className="card">
+                <div className="panel-header">
+                    <span className="panel-title">Recent Activity</span>
+                </div>
+                <div className="panel-content" style={{ backgroundColor: "white", border: "none", padding: 0 }}>
+                    {projects.length === 0 ? (
+                        <div className="empty-state" style={{ padding: "2rem" }}>
+                            <p>No recent activity found.</p>
+                        </div>
+                    ) : (
+                        <div style={{ display: "flex", flexDirection: "column" }}>
+                            {projects.slice(0, 5).map((project) => (
+                                <div key={project.fileId} style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                    padding: "1rem",
+                                    borderBottom: "1px solid var(--border-color)"
+                                }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                                        <div style={{ padding: "0.5rem", backgroundColor: "var(--bg-app)", borderRadius: "8px" }}>
+                                            <FileText size={20} color="var(--text-muted)" />
+                                        </div>
+                                        <div>
+                                            <div style={{ fontWeight: "500" }}>{project.originalName}</div>
+                                            <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                                                {new Date(project.uploadTime).toLocaleDateString()} • {(project.size / 1024).toFixed(1)} KB
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             ))}
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
-    )
-}
-                </div >
-            </div >
-        </div >
     );
 }
