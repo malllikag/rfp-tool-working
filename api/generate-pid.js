@@ -1,8 +1,8 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const MAX_CHARS = 100000;
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
     // CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -71,4 +71,4 @@ Produce the PID with clear sections and headings:
             hint: 'Check that GEMINI_API_KEY is set in Vercel environment variables'
         });
     }
-};
+}
