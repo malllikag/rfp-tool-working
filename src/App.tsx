@@ -5,6 +5,7 @@ import { Document, Packer, Paragraph, TextRun } from "docx";
 import { saveAs } from "file-saver";
 import { LayoutDashboard, Settings, History as HistoryIcon, FileText, LogOut } from "lucide-react";
 import History from "./pages/History";
+import Login from "./pages/Login";
 import { API_URL } from "./config";
 import "./index.css";
 
@@ -257,7 +258,11 @@ function CreateProjectPage() {
   );
 }
 
-function Sidebar() {
+interface SidebarProps {
+  onLogout: () => void;
+}
+
+function Sidebar({ onLogout }: SidebarProps) {
   const location = useLocation();
 
   return (
@@ -289,7 +294,7 @@ function Sidebar() {
       </nav>
 
       <div className="sidebar-footer">
-        <div className="nav-item">
+        <div className="nav-item" onClick={onLogout} style={{ cursor: 'pointer' }}>
           <LogOut size={20} />
           <span>Logout</span>
         </div>
@@ -300,6 +305,23 @@ function Sidebar() {
 
 function AppContent() {
   const location = useLocation();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return localStorage.getItem("isAuthenticated") === "true";
+  });
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+    localStorage.setItem("isAuthenticated", "true");
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem("isAuthenticated");
+  };
+
+  if (!isAuthenticated) {
+    return <Login onLogin={handleLogin} />;
+  }
 
   const getPageTitle = () => {
     switch (location.pathname) {
@@ -314,7 +336,7 @@ function AppContent() {
 
   return (
     <div className="app-container">
-      <Sidebar />
+      <Sidebar onLogout={handleLogout} />
       <main className="main-content">
         <header className="page-header">
           <h1 className="page-title">{getPageTitle()}</h1>
