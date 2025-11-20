@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { jsPDF } from "jspdf";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import { saveAs } from "file-saver";
@@ -17,8 +17,6 @@ export default function CreateProject() {
     const [uploadError, setUploadError] = useState<string | null>(null);
 
     const [previewText, setPreviewText] = useState<string>("");
-    const [isPreviewLoading, setIsPreviewLoading] = useState(false);
-    const [previewError, setPreviewError] = useState<string | null>(null);
 
     const [pidText, setPidText] = useState<string>("");
     const [isPidLoading, setIsPidLoading] = useState(false);
@@ -35,32 +33,27 @@ export default function CreateProject() {
         setFileMeta(null);
         setPreviewText("");
         setPidText("");
-        setPreviewError(null);
-        setPidError(null);
-
-        const formData = new FormData();
-        formData.append("file", file);
 
         try {
-            const res = await fetch(`${API_URL}/api/upload`, {
-                method: "POST",
-                body: formData,
-            });
+            const text = await file.text();
+            setPreviewText(text);
 
-            if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.error || "Upload failed");
-            }
+            const newFileMeta: FileMeta = {
+                fileId: crypto.randomUUID(),
+                originalName: file.name,
+                size: file.size,
+                uploadTime: new Date().toISOString()
+            };
+            setFileMeta(newFileMeta);
 
-            const data = await res.json();
-            setFileMeta({
-                fileId: data.fileId,
-                originalName: data.originalName,
-                size: data.size,
-                uploadTime: data.uploadTime,
-            });
-        } catch (err: any) {
-            setUploadError(err.message || "Error uploading file");
+            const history = localStorage.getItem("rfp_history");
+            const projects = history ? JSON.parse(history) : [];
+            projects.unshift(newFileMeta);
+            localStorage.setItem("rfp_history", JSON.stringify(projects));
+
+        } catch (err) {
+            console.error("Failed to read file", err);
+            setUploadError("Failed to read file content");
         } finally {
             setIsUploading(false);
             if (fileInputRef.current) {
@@ -69,26 +62,8 @@ export default function CreateProject() {
         }
     };
 
-    const handleViewFile = async (fileId: string) => {
-        setIsPreviewLoading(true);
-        setPreviewError(null);
-        try {
-            const res = await fetch(`${API_URL}/api/file/${fileId}/view`);
-            if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.error || "Failed to load preview");
-            }
-            const text = await res.text();
-            setPreviewText(text);
-        } catch (err: any) {
-            setPreviewError(err.message);
-        } finally {
-            setIsPreviewLoading(false);
-        }
-    };
-
     const handleGeneratePid = async () => {
-        if (!fileMeta?.fileId) return;
+        if (!previewText) return;
 
         setIsPidLoading(true);
         setPidError(null);
@@ -98,7 +73,7 @@ export default function CreateProject() {
             const res = await fetch(`${API_URL}/api/generate-pid`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ fileId: fileMeta.fileId }),
+                body: JSON.stringify({ rfpText: previewText }),
             });
 
             if (!res.ok) {
@@ -115,20 +90,12 @@ export default function CreateProject() {
         }
     };
 
-    useEffect(() => {
-        if (fileMeta?.fileId) {
-            handleViewFile(fileMeta.fileId);
-        }
-    }, [fileMeta]);
-
     const copyToClipboard = () => {
         if (pidText) {
             navigator.clipboard.writeText(pidText);
             alert("PID copied to clipboard!");
         }
     };
-
-    // --- Export Functions ---
 
     const exportToPdf = () => {
         if (!pidText) return;
@@ -168,7 +135,6 @@ export default function CreateProject() {
 
     return (
         <div className="main-grid">
-            {/* Left Panel: Input & Preview */}
             <div className="card panel">
                 <div className="panel-header">
                     <span className="panel-title">RFP Document</span>
@@ -204,14 +170,7 @@ export default function CreateProject() {
                                 <span style={{ marginLeft: '0.5rem' }}>({(fileMeta.size / 1024).toFixed(1)} KB)</span>
                             </div>
 
-                            {isPreviewLoading ? (
-                                <div className="empty-state">
-                                    <div className="loading-spinner"></div>
-                                    <p>Loading preview...</p>
-                                </div>
-                            ) : previewError ? (
-                                <div className="status-badge status-error">{previewError}</div>
-                            ) : previewText ? (
+                            {previewText ? (
                                 <div style={{ whiteSpace: 'pre-wrap' }}>{previewText}</div>
                             ) : null}
                         </>
@@ -226,7 +185,7 @@ export default function CreateProject() {
                     )}
                 </div>
 
-                {fileMeta && (
+                {previewText && (
                     <div style={{ marginTop: '1rem' }}>
                         <button
                             className="btn btn-primary"
@@ -245,7 +204,6 @@ export default function CreateProject() {
                 )}
             </div>
 
-            {/* Right Panel: PID Output */}
             <div className="card panel">
                 <div className="panel-header">
                     <span className="panel-title">Generated PID</span>
