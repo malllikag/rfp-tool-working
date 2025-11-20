@@ -17,13 +17,30 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { rfpText } = req.body || {};
+        // Handle body parsing manually if needed
+        let body = req.body;
+        if (typeof body === 'string') {
+            try {
+                body = JSON.parse(body);
+            } catch (e) {
+                console.error('Failed to parse body as JSON:', e);
+                // Continue, maybe it's just a raw string
+            }
+        }
+
+        const { rfpText } = body || {};
 
         if (!rfpText || typeof rfpText !== 'string') {
-            return res.status(400).json({ error: 'rfpText is required and must be a string' });
+            console.error('Invalid rfpText:', typeof rfpText);
+            return res.status(400).json({
+                error: 'rfpText is required and must be a string',
+                received: typeof rfpText,
+                bodyType: typeof body
+            });
         }
 
         if (!process.env.GEMINI_API_KEY) {
+            console.error('GEMINI_API_KEY is missing');
             return res.status(500).json({ error: 'Gemini API key not configured. Please add GEMINI_API_KEY to environment variables.' });
         }
 
@@ -56,8 +73,13 @@ Produce the PID with clear sections and headings:
         const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
         const result = await model.generateContent(prompt);
         const response = await result.response;
+        const responseText = response.text();
 
-        res.status(200).json({ pid: response.text() });
+        if (!responseText) {
+            throw new Error('Empty response from Gemini');
+        }
+
+        res.status(200).json({ pid: responseText });
     } catch (error) {
         console.error('Error in /api/generate-pid:', error);
 
