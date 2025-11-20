@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FileText, Clock, HardDrive } from "lucide-react";
+import { FileText, Clock, CheckCircle } from "lucide-react";
 
 interface ProjectFile {
     fileId: string;
@@ -23,8 +23,7 @@ export default function Dashboard() {
         }
     }, []);
 
-    const totalSize = projects.reduce((acc, curr) => acc + curr.size, 0);
-    const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);
+
 
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
@@ -51,18 +50,18 @@ export default function Dashboard() {
                         <Clock size={24} />
                     </div>
                     <div>
-                        <div style={{ fontSize: "2rem", fontWeight: "bold" }}>{projects.length > 0 ? "Active" : "Idle"}</div>
-                        <div style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>Status</div>
+                        <div style={{ fontSize: "2rem", fontWeight: "bold" }}>0</div>
+                        <div style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>In Progress</div>
                     </div>
                 </div>
 
                 <div className="card" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
                     <div style={{ padding: "1rem", backgroundColor: "rgba(245, 158, 11, 0.1)", borderRadius: "12px", color: "#f59e0b" }}>
-                        <HardDrive size={24} />
+                        <CheckCircle size={24} />
                     </div>
                     <div>
-                        <div style={{ fontSize: "2rem", fontWeight: "bold" }}>{totalSizeMB} MB</div>
-                        <div style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>Storage Used</div>
+                        <div style={{ fontSize: "2rem", fontWeight: "bold" }}>{projects.length}</div>
+                        <div style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>Completed</div>
                     </div>
                 </div>
             </div>
