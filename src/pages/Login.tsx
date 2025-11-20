@@ -30,6 +30,7 @@ export default function Login({ onLogin }: LoginProps) {
     return (
         <div style={{
             minHeight: "100vh",
+            width: "100%", // Ensure it takes full width of the flex container
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
