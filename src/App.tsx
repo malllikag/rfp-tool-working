@@ -28,18 +28,18 @@ function Sidebar({ onLogout }: SidebarProps) {
           <LayoutDashboard size={20} />
           <span>Dashboard</span>
         </Link>
-        <Link to="/create" className={`nav-item ${location.pathname === '/create' ? 'active' : ''}`}>
-          <FileText size={20} />
-          <span>Create Project</span>
-        </Link>
-        <Link to="/history" className={`nav-item ${location.pathname === '/history' ? 'active' : ''}`}>
-          <HistoryIcon size={20} />
-          <span>History</span>
-        </Link>
         <div className="nav-item">
           <Settings size={20} />
           <span>Settings</span>
         </div>
+        <Link to="/history" className={`nav-item ${location.pathname === '/history' ? 'active' : ''}`}>
+          <HistoryIcon size={20} />
+          <span>History</span>
+        </Link>
+        <Link to="/create" className={`nav-item ${location.pathname === '/create' ? 'active' : ''}`}>
+          <FileText size={20} />
+          <span>Create New RFP Project</span>
+        </Link>
       </nav>
 
       <div className="sidebar-footer">

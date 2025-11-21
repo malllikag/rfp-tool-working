@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FileText, Download, Trash2, X } from "lucide-react";
+import { Eye, Trash2, X } from "lucide-react";
 
 interface ProjectFile {
     fileId: string;
@@ -16,7 +16,6 @@ interface DeleteConfirmation {
 export default function History() {
     const [projects, setProjects] = useState<ProjectFile[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [confirmDelete, setConfirmDelete] = useState<DeleteConfirmation | null>(null);
 
     useEffect(() => {
@@ -28,7 +27,6 @@ export default function History() {
                 }
             } catch (e) {
                 console.error("Failed to load history", e);
-                setError("Failed to load history");
             } finally {
                 setLoading(false);
             }
@@ -40,9 +38,9 @@ export default function History() {
         setConfirmDelete(null);
     };
 
-    const handleDownload = (fileId: string) => {
-        console.log("Download requested for:", fileId);
-        alert("File content is not stored in history, only metadata.");
+    const handleView = (fileId: string) => {
+        // For now, just alert as we don't have the full content stored
+        alert(`Viewing details for file ID: ${fileId}\n(Content storage not yet implemented)`);
     };
 
     const handleDeleteClick = (fileId: string, fileName: string) => {
@@ -63,90 +61,92 @@ export default function History() {
         }
     };
 
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    };
+
     return (
-        <>
-            <div className="panel card">
-                <div className="panel-header">
-                    <span className="panel-title">Project History</span>
+        <div style={{ padding: "1rem" }}>
+            <h2 style={{ fontSize: "1.5rem", fontWeight: "600", marginBottom: "2rem", color: "#333" }}>History</h2>
+
+            {loading ? (
+                <div className="empty-state">
+                    <div className="loading-spinner"></div>
+                    <p>Loading history...</p>
                 </div>
-                <div className="panel-content">
-                    {loading ? (
-                        <div className="empty-state">
-                            <div className="loading-spinner"></div>
-                            <p>Loading history...</p>
-                        </div>
-                    ) : error ? (
-                        <div className="status-badge status-error">{error}</div>
-                    ) : projects.length === 0 ? (
-                        <div className="empty-state">
-                            <p>No projects found.</p>
-                        </div>
-                    ) : (
-                        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            ) : projects.length === 0 ? (
+                <div className="empty-state">
+                    <p>No projects found.</p>
+                </div>
+            ) : (
+                <div style={{
+                    backgroundColor: "white",
+                    borderRadius: "12px",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                    overflow: "hidden"
+                }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                        <thead>
+                            <tr style={{ borderBottom: "1px solid #eee" }}>
+                                <th style={{ padding: "1.5rem", fontWeight: "600", color: "#666", fontSize: "0.875rem" }}>Proposal Name</th>
+                                <th style={{ padding: "1.5rem", fontWeight: "600", color: "#666", fontSize: "0.875rem" }}>Date Created</th>
+                                <th style={{ padding: "1.5rem", fontWeight: "600", color: "#666", fontSize: "0.875rem" }}>Status</th>
+                                <th style={{ padding: "1.5rem", fontWeight: "600", color: "#666", fontSize: "0.875rem" }}>Last Updated</th>
+                                <th style={{ padding: "1.5rem", fontWeight: "600", color: "#666", fontSize: "0.875rem" }}>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
                             {projects.map((project) => (
-                                <div
-                                    key={project.fileId}
-                                    style={{
-                                        display: "flex",
-                                        justifyContent: "space-between",
-                                        alignItems: "center",
-                                        padding: "1rem",
-                                        border: "1px solid var(--border-color)",
-                                        borderRadius: "var(--radius-md)",
-                                        backgroundColor: "white",
-                                    }}
-                                >
-                                    <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                                        <div
-                                            style={{
-                                                width: "40px",
-                                                height: "40px",
-                                                borderRadius: "8px",
-                                                backgroundColor: "rgba(107, 95, 255, 0.1)",
-                                                color: "var(--primary)",
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                            }}
-                                        >
-                                            <FileText size={20} />
+                                <tr key={project.fileId} style={{ borderBottom: "1px solid #f9fafb" }}>
+                                    <td style={{ padding: "1.5rem", fontWeight: "500", color: "#333" }}>
+                                        {project.originalName}
+                                    </td>
+                                    <td style={{ padding: "1.5rem", color: "#666", fontSize: "0.875rem" }}>
+                                        {formatDate(project.uploadTime)}
+                                    </td>
+                                    <td style={{ padding: "1.5rem" }}>
+                                        <span style={{
+                                            backgroundColor: "#d1fae5",
+                                            color: "#065f46",
+                                            padding: "0.25rem 0.75rem",
+                                            borderRadius: "9999px",
+                                            fontSize: "0.75rem",
+                                            fontWeight: "500"
+                                        }}>
+                                            Completed
+                                        </span>
+                                    </td>
+                                    <td style={{ padding: "1.5rem", color: "#666", fontSize: "0.875rem" }}>
+                                        {formatDate(project.uploadTime)}
+                                    </td>
+                                    <td style={{ padding: "1.5rem" }}>
+                                        <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+                                            <button
+                                                onClick={() => handleView(project.fileId)}
+                                                style={{ background: "none", border: "none", cursor: "pointer", color: "#6b5fff" }}
+                                                title="View Details"
+                                            >
+                                                <Eye size={18} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteClick(project.fileId, project.originalName)}
+                                                style={{ background: "none", border: "none", cursor: "pointer", color: "#ef4444" }}
+                                                title="Delete"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
                                         </div>
-                                        <div>
-                                            <div style={{ fontWeight: "600", color: "var(--text-main)" }}>
-                                                {project.originalName}
-                                            </div>
-                                            <div style={{ fontSize: "0.875rem", color: "var(--text-muted)" }}>
-                                                {(project.size / 1024).toFixed(1)} KB •{" "}
-                                                {new Date(project.uploadTime).toLocaleDateString()}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div style={{ display: "flex", gap: "0.5rem" }}>
-                                        <button
-                                            className="btn btn-outline"
-                                            onClick={() => handleDownload(project.fileId)}
-                                            title="Download"
-                                        >
-                                            <Download size={16} />
-                                        </button>
-                                        <button
-                                            className="btn btn-outline"
-                                            onClick={() => handleDeleteClick(project.fileId, project.originalName)}
-                                            title="Delete"
-                                            style={{
-                                                color: "#ef4444",
-                                                borderColor: "#ef4444",
-                                            }}
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </div>
-                                </div>
+                                    </td>
+                                </tr>
                             ))}
-                        </div>
-                    )}
+                        </tbody>
+                    </table>
                 </div>
-            </div>
+            )}
 
             {/* Custom Confirmation Modal */}
             {confirmDelete && (
@@ -207,6 +207,6 @@ export default function History() {
                     </div>
                 </div>
             )}
-        </>
+        </div>
     );
 }
