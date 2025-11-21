@@ -36,6 +36,8 @@
 - models/gemini-2.5-flash-preview-09-2025 (supports generateContent)
 - models/gemini-2.5-flash-lite-preview-09-2025 (supports generateContent)
 - models/gemini-3-pro-preview (supports generateContent)
+- models/gemini-3-pro-image-preview (supports generateContent)
+- models/nano-banana-pro-preview (supports generateContent)
 - models/gemini-robotics-er-1.5-preview (supports generateContent)
 - models/gemini-2.5-computer-use-preview-10-2025 (supports generateContent)
 - models/embedding-001
@@ -46,5 +48,3 @@
 - models/aqa
 - models/imagen-4.0-generate-preview-06-06
 - models/imagen-4.0-ultra-generate-preview-06-06
-- models/imagen-4.0-generate-001
-- models/imagen-4.0-ultra-generate-001

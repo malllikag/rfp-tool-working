@@ -6,8 +6,8 @@
   --bg-card: #ffffff;
   --border-color: #e5e7eb;
 
-  --primary: #6b5fff;
-  --primary-hover: #5850e6;
+  --primary: #6B5FFF;
+  --primary-hover: #5850E6;
   --secondary: #f3f4f6;
   --secondary-hover: #e5e7eb;
 
@@ -337,11 +337,11 @@ body {
   border-radius: 50%;
 }
 
-.toggle input:checked + .slider {
+.toggle input:checked+.slider {
   background-color: #6366f1;
 }
 
-.toggle input:checked + .slider:before {
+.toggle input:checked+.slider:before {
   transform: translateX(24px);
 }
 
