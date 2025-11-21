@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { jsPDF } from "jspdf";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import { saveAs } from "file-saver";
@@ -21,7 +21,6 @@ interface ProjectData {
 
 export default function ProjectDetails() {
     const { id } = useParams<{ id: string }>();
-    const navigate = useNavigate();
     const [project, setProject] = useState<ProjectData | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -112,7 +111,7 @@ export default function ProjectDetails() {
         const doc = new jsPDF();
         const lines = doc.splitTextToSize(project.pidText, 180);
         let y = 10;
-        lines.forEach((line) => {
+        lines.forEach((line: string) => {
             if (y > 280) { doc.addPage(); y = 10; }
             doc.text(line, 10, y);
             y += 7;
