@@ -130,79 +130,25 @@ app.get("/api/file/:fileId/view", async (req, res) => {
   } catch (err) {
     console.error("Error reading file for view:", err);
     res.status(500).json({ error: err.message || "Failed to read file" });
-  }
-});
-
-const MAX_CHARS = 100000;
-
-app.post("/api/generate-pid", async (req, res) => {
-  const { fileId } = req.body || {};
-  if (!fileId) return res.status(400).json({ error: "fileId is required" });
-  if (!genAI) return res.status(500).json({ error: "Gemini API key missing" });
-
-  const filePath = path.join(uploadsDir, fileId);
-  if (!fs.existsSync(filePath)) return res.status(404).json({ error: "File not found" });
-
-  try {
-    let rfpText = await extractTextFromFile(filePath);
-    if (!rfpText || rfpText.trim().length === 0) {
-      return res.status(400).json({ error: "Could not extract text from file." });
+    try {
+      const files = fs.readdirSync(uploadsDir);
+      const projectList = files.map((file) => {
+        const filePath = path.join(uploadsDir, file);
+        const stats = fs.statSync(filePath);
+        return {
+          fileId: file,
+          originalName: file.substring(file.indexOf("-") + 1),
+          size: stats.size,
+          uploadTime: stats.birthtime.toISOString(),
+        };
+      });
+      projectList.sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime));
+      res.json(projectList);
+    } catch (err) {
+      console.error("Error listing projects:", err);
+      res.status(500).json({ error: "Failed to list projects" });
     }
-    if (rfpText.length > MAX_CHARS) {
-      rfpText = rfpText.slice(0, MAX_CHARS) + "\n...[TRUNCATED]...";
-    }
-
-    const prompt = `
-You are an experienced project manager.
-You are given the text of a Request for Proposal (RFP). Based on this RFP, draft a concise Project Initiation Document (PID).
-
-RFP TEXT:
-"""
-${rfpText}
-"""
-
-Produce the PID with clear sections and headings:
-1. Project Background and Context
-2. Objectives and Scope
-3. Key Deliverables
-4. Stakeholders and Roles
-5. High-Level Approach and Timeline
-6. Risks and Assumptions
-7. Success Criteria
-`;
-
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    res.json({ pid: response.text() });
-  } catch (error) {
-    console.error("Error in /api/generate-pid:", error);
-    res.status(500).json({ error: error.message || "Failed to generate PID" });
-  }
-});
-
-// --- List all uploaded projects ---
-app.get("/api/projects", (req, res) => {
-  console.log("Listing projects...");
-  try {
-    const files = fs.readdirSync(uploadsDir);
-    const projectList = files.map((file) => {
-      const filePath = path.join(uploadsDir, file);
-      const stats = fs.statSync(filePath);
-      return {
-        fileId: file,
-        originalName: file.substring(file.indexOf("-") + 1),
-        size: stats.size,
-        uploadTime: stats.birthtime.toISOString(),
-      };
-    });
-    projectList.sort((a, b) => new Date(b.uploadTime) - new Date(a.uploadTime));
-    res.json(projectList);
-  } catch (err) {
-    console.error("Error listing projects:", err);
-    res.status(500).json({ error: "Failed to list projects" });
-  }
-});
+  });
 
 // --- List all uploaded projects ---
 app.get("/api/projects", (req, res) => {

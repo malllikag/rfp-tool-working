@@ -295,28 +295,71 @@ export default function CreateProject() {
             </div>
 
             {/* AI Assistant Chat Section */}
-            <div className="card" style={{ marginTop: "2rem" }}>
-                <div className="panel-header" style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                    <MessageSquare size={20} color="var(--primary)" />
-                    <span className="panel-title">AI Assistant</span>
+            <div className="card" style={{
+                marginTop: "2rem",
+                gridColumn: "1 / -1", // Make it span full width
+                background: "linear-gradient(to right, #ffffff, #f8f9fa)",
+                border: "1px solid var(--border-color)",
+                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.05)"
+            }}>
+                <div className="panel-header" style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.75rem",
+                    borderBottom: "1px solid var(--border-color)",
+                    paddingBottom: "1rem",
+                    marginBottom: "1rem"
+                }}>
+                    <div style={{
+                        background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                        padding: "8px",
+                        borderRadius: "8px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center"
+                    }}>
+                        <MessageSquare size={24} color="white" />
+                    </div>
+                    <div>
+                        <span className="panel-title" style={{ fontSize: "1.25rem" }}>AI Copilot</span>
+                        <p style={{ margin: 0, fontSize: "0.875rem", color: "var(--text-muted)" }}>
+                            Refine your PID with natural language instructions
+                        </p>
+                    </div>
                 </div>
+
                 <div className="panel-content">
                     {!pidText ? (
-                        <div className="empty-state">
-                            <p>Generate a PID to start chatting with the AI Assistant</p>
+                        <div className="empty-state" style={{ padding: "3rem 1rem" }}>
+                            <div style={{
+                                width: "64px",
+                                height: "64px",
+                                background: "#f3f4f6",
+                                borderRadius: "50%",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                margin: "0 auto 1rem auto"
+                            }}>
+                                <MessageSquare size={32} color="#9ca3af" />
+                            </div>
+                            <h3 style={{ marginBottom: "0.5rem", color: "var(--text-main)" }}>Ready to Assist</h3>
+                            <p style={{ color: "var(--text-muted)" }}>Generate a PID first to start chatting with the AI Assistant</p>
                         </div>
                     ) : (
                         <>
                             <div style={{
                                 display: "flex",
                                 flexDirection: "column",
-                                gap: "1rem",
-                                maxHeight: "400px",
+                                gap: "1.5rem",
+                                height: "500px", // Fixed height for better scrolling
                                 overflowY: "auto",
                                 marginBottom: "1.5rem",
-                                padding: "1rem",
-                                backgroundColor: "#f9fafb",
-                                borderRadius: "12px"
+                                padding: "1.5rem",
+                                backgroundColor: "#ffffff",
+                                borderRadius: "12px",
+                                border: "1px solid var(--border-color)",
+                                boxShadow: "inset 0 2px 4px rgba(0,0,0,0.02)"
                             }}>
                                 {chatMessages.map((msg, index) => (
                                     <div key={index} style={{
@@ -325,32 +368,35 @@ export default function CreateProject() {
                                     }}>
                                         <div style={{
                                             display: "flex",
-                                            gap: "0.75rem",
-                                            maxWidth: "80%",
+                                            gap: "1rem",
+                                            maxWidth: "70%",
                                             flexDirection: msg.role === 'user' ? 'row-reverse' : 'row'
                                         }}>
                                             <div style={{
-                                                width: "32px",
-                                                height: "32px",
-                                                borderRadius: "50%",
-                                                backgroundColor: msg.role === 'user' ? 'var(--primary)' : '#6b5fff',
+                                                width: "36px",
+                                                height: "36px",
+                                                borderRadius: "12px",
+                                                background: msg.role === 'user' ? 'var(--primary)' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
                                                 display: "flex",
                                                 alignItems: "center",
                                                 justifyContent: "center",
                                                 color: "white",
                                                 flexShrink: 0,
-                                                fontSize: "0.75rem",
-                                                fontWeight: "bold"
+                                                fontSize: "0.875rem",
+                                                fontWeight: "600",
+                                                boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
                                             }}>
                                                 {msg.role === 'user' ? 'JD' : 'AI'}
                                             </div>
                                             <div style={{
-                                                backgroundColor: msg.role === 'user' ? 'var(--primary)' : 'white',
+                                                backgroundColor: msg.role === 'user' ? 'var(--primary)' : '#f8f9fa',
                                                 color: msg.role === 'user' ? 'white' : 'var(--text-main)',
-                                                padding: "1rem",
-                                                borderRadius: "12px",
-                                                boxShadow: msg.role === 'ai' ? "0 1px 2px rgba(0,0,0,0.05)" : "none",
-                                                border: msg.role === 'ai' ? "1px solid var(--border-color)" : "none"
+                                                padding: "1.25rem",
+                                                borderRadius: "16px",
+                                                borderTopLeftRadius: msg.role === 'ai' ? "4px" : "16px",
+                                                borderTopRightRadius: msg.role === 'user' ? "4px" : "16px",
+                                                boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                                                lineHeight: "1.6"
                                             }}>
                                                 {msg.text}
                                             </div>
@@ -359,12 +405,12 @@ export default function CreateProject() {
                                 ))}
                                 {isRefining && (
                                     <div style={{ display: "flex", justifyContent: "flex-start" }}>
-                                        <div style={{ display: "flex", gap: "0.75rem", maxWidth: "80%" }}>
+                                        <div style={{ display: "flex", gap: "1rem", maxWidth: "70%" }}>
                                             <div style={{
-                                                width: "32px",
-                                                height: "32px",
-                                                borderRadius: "50%",
-                                                backgroundColor: '#6b5fff',
+                                                width: "36px",
+                                                height: "36px",
+                                                borderRadius: "12px",
+                                                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
                                                 display: "flex",
                                                 alignItems: "center",
                                                 justifyContent: "center",
@@ -376,42 +422,62 @@ export default function CreateProject() {
                                             </div>
                                             <div style={{
                                                 backgroundColor: 'white',
-                                                padding: "1rem",
-                                                borderRadius: "12px",
+                                                padding: "1rem 1.5rem",
+                                                borderRadius: "16px",
+                                                borderTopLeftRadius: "4px",
                                                 border: "1px solid var(--border-color)",
                                                 display: "flex",
                                                 alignItems: "center",
-                                                gap: "0.5rem"
+                                                gap: "0.75rem",
+                                                boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
                                             }}>
-                                                <div className="loading-spinner" style={{ width: "16px", height: "16px" }}></div>
-                                                <span>Refining PID...</span>
+                                                <div className="loading-spinner" style={{ width: "20px", height: "20px", borderTopColor: "var(--primary)" }}></div>
+                                                <span style={{ color: "var(--text-muted)", fontWeight: "500" }}>Refining PID...</span>
                                             </div>
                                         </div>
                                     </div>
                                 )}
                             </div>
 
-                            <div style={{ display: "flex", gap: "1rem" }}>
-                                <input
-                                    type="text"
-                                    className="input-field"
-                                    placeholder="Ask AI to refine PID..."
-                                    value={chatInput}
-                                    onChange={(e) => setChatInput(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' && !isRefining) {
-                                            handleRefine();
-                                        }
-                                    }}
-                                    disabled={isRefining}
-                                />
+                            <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+                                <div style={{ position: "relative", flex: 1 }}>
+                                    <input
+                                        type="text"
+                                        className="input-field"
+                                        placeholder="Ask AI to refine specific sections (e.g., 'Expand the risks section')..."
+                                        value={chatInput}
+                                        onChange={(e) => setChatInput(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !isRefining) {
+                                                handleRefine();
+                                            }
+                                        }}
+                                        disabled={isRefining}
+                                        style={{
+                                            padding: "1rem 1.25rem",
+                                            paddingRight: "3rem",
+                                            borderRadius: "12px",
+                                            border: "1px solid var(--border-color)",
+                                            boxShadow: "0 2px 4px rgba(0,0,0,0.02)",
+                                            width: "100%",
+                                            fontSize: "1rem"
+                                        }}
+                                    />
+                                </div>
                                 <button
                                     className="btn btn-primary"
                                     onClick={handleRefine}
                                     disabled={!chatInput.trim() || isRefining}
-                                    style={{ padding: "0.75rem" }}
+                                    style={{
+                                        padding: "1rem",
+                                        borderRadius: "12px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        minWidth: "56px"
+                                    }}
                                 >
-                                    <Send size={20} />
+                                    <Send size={24} />
                                 </button>
                             </div>
                         </>
