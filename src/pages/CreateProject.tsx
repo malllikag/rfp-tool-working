@@ -295,123 +295,129 @@ export default function CreateProject() {
             </div>
 
             {/* AI Assistant Chat Section */}
-            {pidText && (
-                <div className="card" style={{ marginTop: "2rem" }}>
-                    <div className="panel-header" style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                        <MessageSquare size={20} color="var(--primary)" />
-                        <span className="panel-title">AI Assistant</span>
-                    </div>
-                    <div className="panel-content">
-                        <div style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "1rem",
-                            maxHeight: "400px",
-                            overflowY: "auto",
-                            marginBottom: "1.5rem",
-                            padding: "1rem",
-                            backgroundColor: "#f9fafb",
-                            borderRadius: "12px"
-                        }}>
-                            {chatMessages.map((msg, index) => (
-                                <div key={index} style={{
-                                    display: "flex",
-                                    justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start'
-                                }}>
-                                    <div style={{
+            <div className="card" style={{ marginTop: "2rem" }}>
+                <div className="panel-header" style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                    <MessageSquare size={20} color="var(--primary)" />
+                    <span className="panel-title">AI Assistant</span>
+                </div>
+                <div className="panel-content">
+                    {!pidText ? (
+                        <div className="empty-state">
+                            <p>Generate a PID to start chatting with the AI Assistant</p>
+                        </div>
+                    ) : (
+                        <>
+                            <div style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "1rem",
+                                maxHeight: "400px",
+                                overflowY: "auto",
+                                marginBottom: "1.5rem",
+                                padding: "1rem",
+                                backgroundColor: "#f9fafb",
+                                borderRadius: "12px"
+                            }}>
+                                {chatMessages.map((msg, index) => (
+                                    <div key={index} style={{
                                         display: "flex",
-                                        gap: "0.75rem",
-                                        maxWidth: "80%",
-                                        flexDirection: msg.role === 'user' ? 'row-reverse' : 'row'
+                                        justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start'
                                     }}>
                                         <div style={{
-                                            width: "32px",
-                                            height: "32px",
-                                            borderRadius: "50%",
-                                            backgroundColor: msg.role === 'user' ? 'var(--primary)' : '#6b5fff',
                                             display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            color: "white",
-                                            flexShrink: 0,
-                                            fontSize: "0.75rem",
-                                            fontWeight: "bold"
+                                            gap: "0.75rem",
+                                            maxWidth: "80%",
+                                            flexDirection: msg.role === 'user' ? 'row-reverse' : 'row'
                                         }}>
-                                            {msg.role === 'user' ? 'JD' : 'AI'}
-                                        </div>
-                                        <div style={{
-                                            backgroundColor: msg.role === 'user' ? 'var(--primary)' : 'white',
-                                            color: msg.role === 'user' ? 'white' : 'var(--text-main)',
-                                            padding: "1rem",
-                                            borderRadius: "12px",
-                                            boxShadow: msg.role === 'ai' ? "0 1px 2px rgba(0,0,0,0.05)" : "none",
-                                            border: msg.role === 'ai' ? "1px solid var(--border-color)" : "none"
-                                        }}>
-                                            {msg.text}
+                                            <div style={{
+                                                width: "32px",
+                                                height: "32px",
+                                                borderRadius: "50%",
+                                                backgroundColor: msg.role === 'user' ? 'var(--primary)' : '#6b5fff',
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                color: "white",
+                                                flexShrink: 0,
+                                                fontSize: "0.75rem",
+                                                fontWeight: "bold"
+                                            }}>
+                                                {msg.role === 'user' ? 'JD' : 'AI'}
+                                            </div>
+                                            <div style={{
+                                                backgroundColor: msg.role === 'user' ? 'var(--primary)' : 'white',
+                                                color: msg.role === 'user' ? 'white' : 'var(--text-main)',
+                                                padding: "1rem",
+                                                borderRadius: "12px",
+                                                boxShadow: msg.role === 'ai' ? "0 1px 2px rgba(0,0,0,0.05)" : "none",
+                                                border: msg.role === 'ai' ? "1px solid var(--border-color)" : "none"
+                                            }}>
+                                                {msg.text}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
-                            {isRefining && (
-                                <div style={{ display: "flex", justifyContent: "flex-start" }}>
-                                    <div style={{ display: "flex", gap: "0.75rem", maxWidth: "80%" }}>
-                                        <div style={{
-                                            width: "32px",
-                                            height: "32px",
-                                            borderRadius: "50%",
-                                            backgroundColor: '#6b5fff',
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            color: "white",
-                                            flexShrink: 0,
-                                            fontWeight: "bold"
-                                        }}>
-                                            AI
-                                        </div>
-                                        <div style={{
-                                            backgroundColor: 'white',
-                                            padding: "1rem",
-                                            borderRadius: "12px",
-                                            border: "1px solid var(--border-color)",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "0.5rem"
-                                        }}>
-                                            <div className="loading-spinner" style={{ width: "16px", height: "16px" }}></div>
-                                            <span>Refining PID...</span>
+                                ))}
+                                {isRefining && (
+                                    <div style={{ display: "flex", justifyContent: "flex-start" }}>
+                                        <div style={{ display: "flex", gap: "0.75rem", maxWidth: "80%" }}>
+                                            <div style={{
+                                                width: "32px",
+                                                height: "32px",
+                                                borderRadius: "50%",
+                                                backgroundColor: '#6b5fff',
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                color: "white",
+                                                flexShrink: 0,
+                                                fontWeight: "bold"
+                                            }}>
+                                                AI
+                                            </div>
+                                            <div style={{
+                                                backgroundColor: 'white',
+                                                padding: "1rem",
+                                                borderRadius: "12px",
+                                                border: "1px solid var(--border-color)",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: "0.5rem"
+                                            }}>
+                                                <div className="loading-spinner" style={{ width: "16px", height: "16px" }}></div>
+                                                <span>Refining PID...</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            )}
-                        </div>
+                                )}
+                            </div>
 
-                        <div style={{ display: "flex", gap: "1rem" }}>
-                            <input
-                                type="text"
-                                className="input-field"
-                                placeholder="Ask AI to refine PID..."
-                                value={chatInput}
-                                onChange={(e) => setChatInput(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && !isRefining) {
-                                        handleRefine();
-                                    }
-                                }}
-                                disabled={isRefining}
-                            />
-                            <button
-                                className="btn btn-primary"
-                                onClick={handleRefine}
-                                disabled={!chatInput.trim() || isRefining}
-                                style={{ padding: "0.75rem" }}
-                            >
-                                <Send size={20} />
-                            </button>
-                        </div>
-                    </div>
+                            <div style={{ display: "flex", gap: "1rem" }}>
+                                <input
+                                    type="text"
+                                    className="input-field"
+                                    placeholder="Ask AI to refine PID..."
+                                    value={chatInput}
+                                    onChange={(e) => setChatInput(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !isRefining) {
+                                            handleRefine();
+                                        }
+                                    }}
+                                    disabled={isRefining}
+                                />
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={handleRefine}
+                                    disabled={!chatInput.trim() || isRefining}
+                                    style={{ padding: "0.75rem" }}
+                                >
+                                    <Send size={20} />
+                                </button>
+                            </div>
+                        </>
+                    )}
                 </div>
-            )}
+            </div>
         </div>
     );
 }
