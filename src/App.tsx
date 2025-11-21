@@ -5,6 +5,9 @@ import History from "./pages/History";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import CreateProject from "./pages/CreateProject";
+import ProjectDetails from "./pages/ProjectDetails";
+import SettingsPage from "./pages/Settings";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import "./index.css";
 
 interface SidebarProps {
@@ -28,10 +31,10 @@ function Sidebar({ onLogout }: SidebarProps) {
           <LayoutDashboard size={20} />
           <span>Dashboard</span>
         </Link>
-        <div className="nav-item">
+        <Link to="/settings" className={`nav-item ${location.pathname === '/settings' ? 'active' : ''}`}>
           <Settings size={20} />
           <span>Settings</span>
-        </div>
+        </Link>
         <Link to="/history" className={`nav-item ${location.pathname === '/history' ? 'active' : ''}`}>
           <HistoryIcon size={20} />
           <span>History</span>
@@ -80,7 +83,12 @@ function AppContent() {
         return 'New Project';
       case '/history':
         return 'Project History';
+      case '/settings':
+        return 'Settings';
       default:
+        if (location.pathname.startsWith('/project/')) {
+          return 'Project Details';
+        }
         return 'AI Project Planner';
     }
   };
@@ -108,11 +116,15 @@ function AppContent() {
           </div>
         </header>
 
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/create" element={<CreateProject />} />
-          <Route path="/history" element={<History />} />
-        </Routes>
+        <ErrorBoundary>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/create" element={<CreateProject />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/project/:id" element={<ProjectDetails />} />
+          </Routes>
+        </ErrorBoundary>
       </main>
     </div>
   );
@@ -121,7 +133,9 @@ function AppContent() {
 function App() {
   return (
     <BrowserRouter>
-      <AppContent />
+      <ErrorBoundary>
+        <AppContent />
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }
