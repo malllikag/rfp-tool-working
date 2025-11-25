@@ -33,18 +33,33 @@ const upload = multer({ storage });
 // Helper: extract text from supported files
 async function extractTextFromFile(filePath) {
   const ext = path.extname(filePath).toLowerCase();
+
   // PDF
   if (ext === ".pdf") {
     try {
       const dataBuffer = fs.readFileSync(filePath);
       const data = await pdfParse(dataBuffer);
-      if (data && data.text && data.text.trim().length > 0) return data.text;
+
+      // If valid text extracted, use it
+      if (data?.text && data.text.trim().length > 0) {
+        // Clean up the text: normalize newlines and spaces
+        let cleanText = data.text
+          .replace(/\r\n/g, "\n")
+          .replace(/\n\s*\n/g, "\n\n") // Preserve paragraph breaks
+          .replace(/[ \t]+/g, " ")     // Collapse multiple spaces
+          .trim();
+        return cleanText;
+      }
+
+      // ❗If pdf-parse returned nothing, DO NOT read raw PDF bytes
+      console.error("PDF parsed but text is empty — treating as parse failure.");
+      return null;
     } catch (e) {
       console.error("PDF parse error:", e);
+      return null;
     }
-    // fallback to raw read
-    return fs.readFileSync(filePath, "utf-8");
   }
+
   // Plain text / markdown
   if (ext === ".txt" || ext === ".md") {
     return fs.readFileSync(filePath, "utf-8");
@@ -88,6 +103,11 @@ app.get("/api/file/:fileId/view", async (req, res) => {
   if (!fs.existsSync(filePath)) return res.status(404).json({ error: "File not found" });
   try {
     const text = await extractTextFromFile(filePath);
+    if (!text) {
+      return res.status(400).json({
+        error: "Could not extract text from the PDF. Try uploading a readable (non-scanned) PDF."
+      });
+    }
     res.type("text/plain").send(text);
   } catch (e) {
     console.error("View error:", e);
@@ -128,6 +148,11 @@ app.post("/api/generate-pid", async (req, res) => {
     if (!fs.existsSync(filePath)) return res.status(404).json({ error: "File not found" });
     try {
       textContent = await extractTextFromFile(filePath);
+      if (!textContent) {
+        return res.status(400).json({
+          error: "Could not extract text from the PDF. Try uploading a readable (non-scanned) PDF."
+        });
+      }
     } catch (e) {
       console.error("Extract error:", e);
       return res.status(500).json({ error: "Failed to extract text from file" });

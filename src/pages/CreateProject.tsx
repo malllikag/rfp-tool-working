@@ -50,6 +50,68 @@ export default function CreateProject() {
         }
     };
 
+    const [isDragging, setIsDragging] = useState(false);
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+    };
+
+    const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+
+        const files = e.dataTransfer.files;
+        if (files && files.length > 0) {
+            const file = files[0];
+
+            // Check file extension
+            const allowedExtensions = ['.pdf', '.txt', '.md', '.html', '.htm'];
+            const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+
+            if (!allowedExtensions.includes(fileExtension)) {
+                setError(`Unsupported file type. Please upload: ${allowedExtensions.join(', ')}`);
+                return;
+            }
+
+            // Process the file using the same logic as handleFileChange
+            setError(null);
+            setFileMeta(null);
+            setPreviewText("");
+
+            try {
+                const text = await file.text();
+                setPreviewText(text);
+
+                const newFileMeta: FileMeta = {
+                    fileId: crypto.randomUUID(),
+                    originalName: file.name,
+                    size: file.size,
+                    uploadTime: new Date().toISOString()
+                };
+                setFileMeta(newFileMeta);
+
+                // Save to history
+                const history = localStorage.getItem("rfp_history");
+                const projects = history ? JSON.parse(history) : [];
+                projects.unshift(newFileMeta);
+                localStorage.setItem("rfp_history", JSON.stringify(projects));
+
+            } catch (err) {
+                console.error("Failed to read file", err);
+                setError("Failed to read file content");
+            }
+        }
+    };
+
     const handleGenerateRFP = async () => {
         if (!previewText || !fileMeta) return;
 
@@ -101,13 +163,16 @@ export default function CreateProject() {
             {/* Upload Area */}
             <div
                 onClick={() => fileInputRef.current?.click()}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
                 style={{
                     width: "100%",
                     maxWidth: "600px",
                     height: "300px",
-                    border: "2px dashed #c7d2fe",
+                    border: isDragging ? "2px dashed #6B5FFF" : "2px dashed #c7d2fe",
                     borderRadius: "12px",
-                    backgroundColor: "#f8faff",
+                    backgroundColor: isDragging ? "#f0edff" : "#f8faff",
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
@@ -123,7 +188,7 @@ export default function CreateProject() {
                 </h3>
                 <p style={{ color: "#6b7280", marginBottom: "0.5rem" }}>or click to browse</p>
                 <p style={{ fontSize: "0.875rem", color: "#9ca3af" }}>
-                    Supported formats: PDF, DOCX, PNG, JPG
+                    Supported formats: PDF, TXT, MD, HTML
                 </p>
                 {fileMeta && (
                     <p style={{ fontSize: "0.875rem", color: "#6B5FFF", marginTop: "1rem" }}>
@@ -137,7 +202,7 @@ export default function CreateProject() {
                 ref={fileInputRef}
                 onChange={handleFileChange}
                 style={{ display: "none" }}
-                accept=".pdf,.txt,.md,.html,.docx"
+                accept=".pdf,.txt,.md,.html,.htm"
             />
 
             <div style={{ color: "#9ca3af", fontWeight: "500", marginBottom: "2rem" }}>OR</div>
