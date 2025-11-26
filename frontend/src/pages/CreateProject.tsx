@@ -10,6 +10,40 @@ interface FileMeta {
     uploadTime: string;
 }
 
+
+async function uploadPdfAndGetText(file: File): Promise<{ fileId: string; text: string }> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    // Upload the file to backend
+    const uploadRes = await fetch(`${API_URL}/api/upload`, {
+        method: "POST",
+        body: formData,
+    });
+
+    if (!uploadRes.ok) {
+        const errJson = await uploadRes.json().catch(() => ({}));
+        throw new Error(errJson.error || "Upload failed");
+    }
+
+    const uploadData = await uploadRes.json();
+    const fileId: string = uploadData.fileId;
+
+    // Get parsed text from backend
+    const viewRes = await fetch(`${API_URL}/api/file/${fileId}/view`);
+    if (!viewRes.ok) {
+        const errJson = await viewRes.json().catch(() => ({}));
+        throw new Error(errJson.error || "Failed to read file contents");
+    }
+
+    const text = await viewRes.text();
+    if (!text || !text.trim()) {
+        throw new Error("File contains no readable text");
+    }
+
+    return { fileId, text };
+}
+
 export default function CreateProject() {
     const navigate = useNavigate();
     const [fileMeta, setFileMeta] = useState<FileMeta | null>(null);
@@ -26,12 +60,27 @@ export default function CreateProject() {
         setFileMeta(null);
         setPreviewText("");
 
+        const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+
         try {
-            const text = await file.text();
+            let text: string;
+            let fileId: string;
+
+            if (isPdf) {
+                // Use backend for PDFs
+                const result = await uploadPdfAndGetText(file);
+                text = result.text;
+                fileId = result.fileId;
+            } else {
+                // Client-side for text files
+                text = await file.text();
+                fileId = crypto.randomUUID();
+            }
+
             setPreviewText(text);
 
             const newFileMeta: FileMeta = {
-                fileId: crypto.randomUUID(),
+                fileId,
                 originalName: file.name,
                 size: file.size,
                 uploadTime: new Date().toISOString()
@@ -44,9 +93,9 @@ export default function CreateProject() {
             projects.unshift(newFileMeta);
             localStorage.setItem("rfp_history", JSON.stringify(projects));
 
-        } catch (err) {
+        } catch (err: any) {
             console.error("Failed to read file", err);
-            setError("Failed to read file content");
+            setError(err?.message || "Failed to read file content");
         }
     };
 
@@ -82,17 +131,32 @@ export default function CreateProject() {
                 return;
             }
 
-            // Process the file using the same logic as handleFileChange
+            // Use same logic as handleFileChange
             setError(null);
             setFileMeta(null);
             setPreviewText("");
 
+            const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+
             try {
-                const text = await file.text();
+                let text: string;
+                let fileId: string;
+
+                if (isPdf) {
+                    // Use backend for PDFs
+                    const result = await uploadPdfAndGetText(file);
+                    text = result.text;
+                    fileId = result.fileId;
+                } else {
+                    // Client-side for text files
+                    text = await file.text();
+                    fileId = crypto.randomUUID();
+                }
+
                 setPreviewText(text);
 
                 const newFileMeta: FileMeta = {
-                    fileId: crypto.randomUUID(),
+                    fileId,
                     originalName: file.name,
                     size: file.size,
                     uploadTime: new Date().toISOString()
@@ -105,9 +169,9 @@ export default function CreateProject() {
                 projects.unshift(newFileMeta);
                 localStorage.setItem("rfp_history", JSON.stringify(projects));
 
-            } catch (err) {
+            } catch (err: any) {
                 console.error("Failed to read file", err);
-                setError("Failed to read file content");
+                setError(err?.message || "Failed to read file content");
             }
         }
     };

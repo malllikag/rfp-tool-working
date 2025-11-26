@@ -20,15 +20,21 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
 
-// Multer setup
+// Multer setup with file size limits
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadsDir),
-  filename: (req, file) => {
+  filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    return uniqueSuffix + "-" + file.originalname;
+    cb(null, uniqueSuffix + "-" + file.originalname);
   },
 });
-const upload = multer({ storage });
+
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB limit
+  }
+});
 
 // Helper: extract text from supported files
 async function extractTextFromFile(filePath) {
@@ -73,20 +79,39 @@ async function extractTextFromFile(filePath) {
 }
 
 app.use(cors({ origin: process.env.FRONTEND_URL || "*", credentials: true }));
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Health check
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
 
-// File upload
-app.post("/api/upload", upload.single("file"), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
-  const fileId = req.file.filename;
-  res.json({
-    fileId,
-    originalName: req.file.originalname,
-    size: req.file.size,
-    uploadTime: new Date().toISOString(),
+// File upload with error handling
+app.post("/api/upload", (req, res) => {
+  upload.single("file")(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      console.error("Multer error:", err);
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ error: "File too large. Maximum size is 50MB." });
+      }
+      return res.status(400).json({ error: `Upload error: ${err.message}` });
+    } else if (err) {
+      console.error("Upload error:", err);
+      return res.status(500).json({ error: "Upload failed" });
+    }
+
+    console.log("Upload request received");
+    if (!req.file) {
+      console.error("No file in request");
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    console.log("File uploaded:", req.file.filename);
+    const fileId = req.file.filename;
+    res.json({
+      fileId,
+      originalName: req.file.originalname,
+      size: req.file.size,
+      uploadTime: new Date().toISOString(),
+    });
   });
 });
 
@@ -99,8 +124,12 @@ app.get("/api/file/:fileId", (req, res) => {
 
 // View file as text
 app.get("/api/file/:fileId/view", async (req, res) => {
+  console.log("View request for:", req.params.fileId);
   const filePath = path.join(uploadsDir, req.params.fileId);
-  if (!fs.existsSync(filePath)) return res.status(404).json({ error: "File not found" });
+  if (!fs.existsSync(filePath)) {
+    console.error("File not found:", filePath);
+    return res.status(404).json({ error: "File not found" });
+  }
   try {
     const text = await extractTextFromFile(filePath);
     if (!text) {
@@ -108,6 +137,7 @@ app.get("/api/file/:fileId/view", async (req, res) => {
         error: "Could not extract text from the PDF. Try uploading a readable (non-scanned) PDF."
       });
     }
+    console.log("Text extracted, length:", text.length);
     res.type("text/plain").send(text);
   } catch (e) {
     console.error("View error:", e);
